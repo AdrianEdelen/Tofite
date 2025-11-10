@@ -12,6 +12,27 @@ set -ouex pipefail
 # this installs a package from fedora repos
 dnf5 install -y tmux 
 
+# Install Visual Studio Code from Microsoft's RPM repo (not Flatpak)
+echo "Adding Microsoft VS Code repository and installing code..."
+# create repo file
+cat > /etc/yum.repos.d/vscode.repo <<'EOF'
+[code]
+name=Visual Studio Code
+baseurl=https://packages.microsoft.com/yumrepos/vscode
+enabled=1
+gpgcheck=1
+gpgkey=https://packages.microsoft.com/keys/microsoft.asc
+EOF
+# import the signing key
+rpm --import https://packages.microsoft.com/keys/microsoft.asc || true
+# update metadata (non-fatal)
+dnf5 check-update || true
+# install VS Code
+dnf5 install -y code || true
+
+echo "Running Fanatec installation script..."
+/ctx/scripts/install-fanatec.sh
+
 # Use a COPR Example:
 #
 # dnf5 -y copr enable ublue-os/staging
